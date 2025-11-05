@@ -7,5 +7,5 @@
 "./LP_MSPM0G3507/timer.o"
 "./LP_MSPM0G3507/uart.o"
 "../mspm0g3507.cmd"
--l"C:/ti/mspm0_sdk_2_07_00_05/source/ti/driverlib/lib/ticlang/m0p/mspm0g1x0x_g3x0x/driverlib.a"
+-l"C:/TI/mspm0_sdk_2_07_00_05/source/ti/driverlib/lib/ticlang/m0p/mspm0g1x0x_g3x0x/driverlib.a"
 -llibc.a

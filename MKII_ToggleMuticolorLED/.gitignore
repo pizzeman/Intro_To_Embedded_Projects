@@ -1,0 +1,39 @@
+# Build output
+/Debug/
+/Release/
+/*/Debug/
+/*/Release/
+*.out
+*.elf
+*.map
+*.bin
+*.hex
+
+# Compiler/IDE generated files
+*.o
+*.obj
+*.d
+*.log
+*.dep
+*.cmd~
+*.launch
+
+# CCS / Eclipse specific cache files
+/.metadata/
+.remote/
+*.copy_resources
+
+# SysConfig generated cache (not the .syscfg file!)
+/sysconfig/.cache/
+
+# Clangd index
+/.clangd/
+.clangd/
+.clangd-cache/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.DS_Store
+Thumbs.db
