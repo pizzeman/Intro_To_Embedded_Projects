@@ -21,7 +21,7 @@
 		<link>
 			<name>LP_MSPM0G3507</name>
 			<type>2</type>
-			<location>C:/Users/perid/Intro_To_Embedded_Projects/LP_MSPM0G3507</location>
+			<locationURI>PARENT-1-PROJECT_LOC/LP_MSPM0G3507</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
