@@ -146,7 +146,7 @@ all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 SPI_LCD_HelloWorld.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: Arm Linker'
-	"C:/ti/ccs2020/ccs/tools/compiler/ti-cgt-armllvm_4.0.3.LTS/bin/tiarmclang.exe" -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O2 -D__MSPM0G3507__ -gdwarf-3 -Wl,-m"SPI_LCD_HelloWorld.map" -Wl,-i"C:/ti/mspm0_sdk_2_07_00_05/source" -Wl,-i"C:/Users/perid/Intro_To_Embedded_Projects/SPI_LCD_HelloWorld" -Wl,-i"C:/ti/ccs2020/ccs/tools/compiler/ti-cgt-armllvm_4.0.3.LTS/lib" -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--xml_link_info="SPI_LCD_HelloWorld_linkInfo.xml" -Wl,--rom_model -o "SPI_LCD_HelloWorld.out" $(ORDERED_OBJS)
+	"C:/ti/ccs2020/ccs/tools/compiler/ti-cgt-armllvm_4.0.3.LTS/bin/tiarmclang.exe" -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O0 -D__MSPM0G3507__ -gdwarf-3 -Wl,-m"SPI_LCD_HelloWorld.map" -Wl,-i"C:/ti/mspm0_sdk_2_07_00_05/source" -Wl,-i"C:/Users/perid/Intro_To_Embedded_Projects/SPI_LCD_HelloWorld" -Wl,-i"C:/ti/ccs2020/ccs/tools/compiler/ti-cgt-armllvm_4.0.3.LTS/lib" -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--xml_link_info="SPI_LCD_HelloWorld_linkInfo.xml" -Wl,--rom_model -o "SPI_LCD_HelloWorld.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
