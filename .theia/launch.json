@@ -18,6 +18,15 @@
                 "name": "MKII_ToggleMuticolorLED_Final",
                 "resourceId": "/MKII_ToggleMuticolorLED_Final"
             }
+        },
+        {
+            "name": "PWM_PlayBuzzer",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "PWM_PlayBuzzer",
+                "resourceId": "/PWM_PlayBuzzer"
+            }
         }
     ]
 }
