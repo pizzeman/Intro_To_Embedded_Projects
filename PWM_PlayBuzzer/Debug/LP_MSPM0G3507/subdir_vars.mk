@@ -6,12 +6,12 @@ SHELL = cmd.exe
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-C:/Users/amosa/Intro_To_Embedded_Projects/LP_MSPM0G3507/MKII.c \
-C:/Users/amosa/Intro_To_Embedded_Projects/LP_MSPM0G3507/bsp.c \
-C:/Users/amosa/Intro_To_Embedded_Projects/LP_MSPM0G3507/clock.c \
-C:/Users/amosa/Intro_To_Embedded_Projects/LP_MSPM0G3507/mspm0g350x_int.c \
-C:/Users/amosa/Intro_To_Embedded_Projects/LP_MSPM0G3507/timer.c \
-C:/Users/amosa/Intro_To_Embedded_Projects/LP_MSPM0G3507/uart.c 
+C:/Users/perid/Intro_To_Embedded_Projects/LP_MSPM0G3507/MKII.c \
+C:/Users/perid/Intro_To_Embedded_Projects/LP_MSPM0G3507/bsp.c \
+C:/Users/perid/Intro_To_Embedded_Projects/LP_MSPM0G3507/clock.c \
+C:/Users/perid/Intro_To_Embedded_Projects/LP_MSPM0G3507/mspm0g350x_int.c \
+C:/Users/perid/Intro_To_Embedded_Projects/LP_MSPM0G3507/timer.c \
+C:/Users/perid/Intro_To_Embedded_Projects/LP_MSPM0G3507/uart.c 
 
 C_DEPS += \
 ./LP_MSPM0G3507/MKII.d \
@@ -46,11 +46,11 @@ C_DEPS__QUOTED += \
 "LP_MSPM0G3507\uart.d" 
 
 C_SRCS__QUOTED += \
-"C:/Users/amosa/Intro_To_Embedded_Projects/LP_MSPM0G3507/MKII.c" \
-"C:/Users/amosa/Intro_To_Embedded_Projects/LP_MSPM0G3507/bsp.c" \
-"C:/Users/amosa/Intro_To_Embedded_Projects/LP_MSPM0G3507/clock.c" \
-"C:/Users/amosa/Intro_To_Embedded_Projects/LP_MSPM0G3507/mspm0g350x_int.c" \
-"C:/Users/amosa/Intro_To_Embedded_Projects/LP_MSPM0G3507/timer.c" \
-"C:/Users/amosa/Intro_To_Embedded_Projects/LP_MSPM0G3507/uart.c" 
+"C:/Users/perid/Intro_To_Embedded_Projects/LP_MSPM0G3507/MKII.c" \
+"C:/Users/perid/Intro_To_Embedded_Projects/LP_MSPM0G3507/bsp.c" \
+"C:/Users/perid/Intro_To_Embedded_Projects/LP_MSPM0G3507/clock.c" \
+"C:/Users/perid/Intro_To_Embedded_Projects/LP_MSPM0G3507/mspm0g350x_int.c" \
+"C:/Users/perid/Intro_To_Embedded_Projects/LP_MSPM0G3507/timer.c" \
+"C:/Users/perid/Intro_To_Embedded_Projects/LP_MSPM0G3507/uart.c" 
 
 
