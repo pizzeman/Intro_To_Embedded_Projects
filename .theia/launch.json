@@ -27,6 +27,15 @@
                 "name": "PWM_PlayBuzzer",
                 "resourceId": "/PWM_PlayBuzzer"
             }
+        },
+        {
+            "name": "SPI_LCD_HelloWorld",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "SPI_LCD_HelloWorld",
+                "resourceId": "/SPI_LCD_HelloWorld"
+            }
         }
     ]
 }

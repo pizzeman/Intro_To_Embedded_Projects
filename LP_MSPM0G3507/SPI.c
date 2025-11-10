@@ -64,10 +64,11 @@ void InitializeSPI(SPI_Regs *spi, SPI_Config *spi_config)
 void SPISendByte(uint8_t SendData)
 {
     // Wait while the transmit buffer is not empty.
-
+    while (!((spi_sr->STAT & SPI_STAT_TFE_MASK) == SPI_STAT_TFE_EMPTY));
     // Transmit the data using the TXDATA register.
-
+    spi_sr->TXDATA = SendData;
     // Wait until the transmitter is not busy (that is, transmission is complete).
+    while ((spi_sr->STAT & SPI_STAT_BUSY_MASK) == SPI_STAT_BUSY_ACTIVE);
 }
 
 uint8_t SPIReceiveByte(void)
