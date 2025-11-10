@@ -9,6 +9,15 @@
                 "name": "MKII_ToggleMuticolorLED",
                 "resourceId": "/MKII_ToggleMuticolorLED"
             }
+        },
+        {
+            "name": "MKII_ToggleMuticolorLED_Final",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "MKII_ToggleMuticolorLED_Final",
+                "resourceId": "/MKII_ToggleMuticolorLED_Final"
+            }
         }
     ]
 }
