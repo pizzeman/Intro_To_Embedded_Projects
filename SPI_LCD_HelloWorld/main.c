@@ -14,10 +14,10 @@ int main(void)
     LCD_Init();
     LCD_FillScreen(LCD_BLACK);
     LCD_SetTextColor(LCD_CYAN);
-    LCD_OutString("Hello World!\n");     
+    LCD_OutString("AJ \"Pizzeman\" Amos \nand Isaiah \"Stingray\" \nBumgardner\n");     
 
     while (TRUE) {
-        BP_ToggleBlueLED();
+        //BP_ToggleBlueLED();
         ClockDelay(250*ONE_MILLISECOND_DELAY);
     }
     return 0;
