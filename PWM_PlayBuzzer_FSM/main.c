@@ -144,12 +144,11 @@ void OutputSong(void *FSM){
     if (FSM_l->CurrentState == Start){
         TimerA1TimerConfig.period = period;
         TimerA1PWMConfig.duty = period >> 1;
-        InitializeTimerCompare(TIMA1, &TimerA1TimerConfig);
-        InitializeTimerPWM(TIMA1, &TimerA1PWMConfig);
+        UpdateDutyCycle(&TimerA1TimerConfig, &TimerA1PWMConfig);
     }
     if(FSM_l->CurrentState == Stop){
         TimerA1PWMConfig.duty = 0;
-        InitializeTimerPWM(TIMA1, &TimerA1PWMConfig);
+        UpdateDutyCycle(&TimerA1TimerConfig, &TimerA1PWMConfig);
     }
 }
 
