@@ -14,7 +14,7 @@ typedef enum {up,down} PWM_direction;
 //Defines for PWM
 #define PWM_PERIOD 10*ONE_MILLISECOND_DELAY //PWM f = 100 Hz => T = ms
 #define PWM_DELTA 100*ONE_MICROSECOND_DELAY // 1% Change in duty cycle
-#define PWM_PRESCALE 3 
+#define PWM_PRESCALE 0 
 #define TRUE 1
 #define FALSE 0
 
@@ -36,7 +36,7 @@ Timer_ClockConfig TimerA1ClockConfig =
 };
 Timer_TimerConfig TimerA1TimerConfig =
 {
-    .period = PWM_PERIOD,
+    .period = 0,
     .timerMode = (GPTIMER_CTRCTL_CM_DOWN | GPTIMER_CTRCTL_REPEAT_REPEAT_1)
 };
 Timer_PWMConfig TimerA1PWMConfig = 
@@ -140,21 +140,22 @@ FSMState NextStateAlgorithm(void *FSM)
 
 void OutputSong(void *FSM){
     FSMType * FSM_l = (FSMType *) FSM;
-    uint32_t period =  CalculatePeriod(NOTE_C3);
+    uint32_t period =  CalculatePeriod(NOTE_C5);
+    TimerA1TimerConfig.period = period;
+
     if (FSM_l->CurrentState == Start){
-        TimerA1TimerConfig.period = period;
         TimerA1PWMConfig.duty = period >> 1;
-        UpdateDutyCycle(&TimerA1TimerConfig, &TimerA1PWMConfig);
+        UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
     }
     if(FSM_l->CurrentState == Stop){
         TimerA1PWMConfig.duty = 0;
-        UpdateDutyCycle(&TimerA1TimerConfig, &TimerA1PWMConfig);
+        UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
     }
 }
 
 void Group1CallbackFunction(void *CallbackObject){
     FSMType *FSM = (FSMType *)CallbackObject;
-    OutputSong((void *)FSM);
+    //OutputSong((void *)FSM);
 
     uint32_t IIDXValue = BP_S1_PORT->CPU_INT.IIDX;
 
