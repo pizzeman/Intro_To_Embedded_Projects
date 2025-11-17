@@ -2,7 +2,7 @@
 #define TMP006_H_
 
 #include <ti/devices/msp/msp.h>
-#include "../../LP_MSPM0G3507/i2c.h"
+#include "../LP_MSPM0G3507/i2c.h"
 #include <math.h>
 
 #define TMP006_INT_PIN  16
