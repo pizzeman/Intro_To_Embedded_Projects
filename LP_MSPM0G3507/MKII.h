@@ -51,6 +51,10 @@
 #define BP_S2_POL_FALLING ((uint32_t) (GPIO_POL_FALLING << (2*(BP_S2_PIN))))
 #define BP_S2_INTERRUPT GPIOA_INT_IRQn
 
+// I2C PINCMS
+#define SCL_PINCM       PB2INDEX
+#define SDA_PINCM       PB3INDEX
+
 void InitializeBoosterpack(uint32_t ClockFrequency);
 
 /**
