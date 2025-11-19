@@ -4,6 +4,11 @@
 #include <ti/devices/msp/msp.h>
 #include "i2c.h"
 
+#define OPT3001_INT_PIN     27
+#define OPT3001_INT_MASK    ((uint32_t) (0x00000001U << OPT3001_INT_PIN))
+#define OPT3001_INT_PORT    GPIOA
+#define OPT3001_INT_INDEX   PA27INDEX
+
 // Opt3001 sensor I2C address
 #define OPT3001_ADDRESS 0x44
 
