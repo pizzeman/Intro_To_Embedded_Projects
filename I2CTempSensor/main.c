@@ -17,6 +17,7 @@ int main(void)
 {
     InitializeBoosterpack(CLOCK_FREQUENCY);
     InitializeI2C(I2C1,&i2c1_config);
+    InitializeTmp006Sensor(I2C1);
 
     LCD_Init();
     LCD_FillScreen(LCD_BLACK);
@@ -28,8 +29,8 @@ int main(void)
       // Wait for ACK
       
       // Use I2C to read sensor value
-      int16_t raw_v = sensorTmp006Read(I2C1, TMP006_ADDRESS + VOLTAGE_REGISTER_ADDRESS);
-      int16_t raw_t = sensorTmp006Read(I2C1, TMP006_ADDRESS + LOCAL_TEMP_REGISTER_ADDRESS);
+      int16_t raw_v = sensorTmp006Read(I2C1, VOLTAGE_REGISTER_ADDRESS);
+      int16_t raw_t = sensorTmp006Read(I2C1, LOCAL_TEMP_REGISTER_ADDRESS);
 
       float calc_temp = sensorTmp006ConvertTemp(raw_v, raw_t);
 
