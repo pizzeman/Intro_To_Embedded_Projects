@@ -29,8 +29,9 @@ float sensorOpt3001Convert(uint16_t rawData)
 {
     float convertedLux = 0.0;
 
-    // Use the transfer function equation from the OPT3001 datasheet to convert
-    // the sensor reading to an equivalent value in units of lux.
+    // lux = 0.01 × (2E[3:0]) × R[11:0] 
+
+    convertedLux = 0.01 * ((2^(rawData >> 12)) * (rawData & MASK_R_VALUE));
 
     return convertedLux;
 }
