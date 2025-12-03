@@ -8,6 +8,9 @@
 #include "../LP_MSPM0G3507/tone_pitch.h"
 #include "FSM_A.h"
 #include "ti/devices/msp/msp.h"
+#include "../LP_MSPM0G3507/LCD.h"
+#include "../LP_MSPM0G3507/SPI.h"
+
 
 #define NT NOTE_C4
 
@@ -24,6 +27,7 @@ FSMState NextStateAlgorithm(void *FSM);
 void PlaySong(void *FSM);
 void FSMSong(void *FSM);
 void Group1CallbackFunction(void *CallbackObject);
+char* NoteToText(int note);
 
 // Global variables
 Callback_s Group1 = {(void *)0, Group1CallbackFunction};
@@ -80,6 +84,15 @@ int main(void) {
   // Hardware Initializations
   InitializeLaunchpad(PROJECT_CLOCK_FREQUENCY);
   InitializeBoosterpack(PROJECT_CLOCK_FREQUENCY);
+
+  //LCD Initializations
+  LCD_Init();
+  LCD_FillScreen(LCD_BLACK);
+  LCD_SetTextColor(LCD_CYAN);
+  LCD_OutString("AJ \"Pizzeman\" Amos \nand Isaiah \"Stingray\" \nBumgardner\n");   
+  char buffer[50];
+
+  LCD_OutString(NoteToText(melody[0]));
 
   uint32_t period = CalculatePeriod(NT);
   TimerA1TimerConfig.period = period;
@@ -158,6 +171,10 @@ void PlaySong(void *FSM) {
 
   // Turn set duty cycle to 0 if in stop state
   if (FSM_l->CurrentState == Stop) {
+    LCD_SetCursor(0, 0);
+    LCD_OutString("THE SONG HAS BEEN PAUSED!");
+    LCD_OutString("\n");
+    
     TimerA1PWMConfig.duty = 0;
     UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
     BP_TurnOffBlueLED();
@@ -233,4 +250,36 @@ void Group1CallbackFunction(void *CallbackObject) {
   FSM->CurrentState = NextStateAlgorithm((void *)FSM);
   FSM->CurrentInput_S1 = 0;
   FSM->CurrentInput_S2 = 0;
+}
+
+char* NoteToText(int note){
+  switch (note){
+  default:
+    return "PTICH NOT FOUND MF";
+  case NOTE_B0:
+    return "B0";
+  case NOTE_C1:
+    return "C1";
+  case NOTE_CS1:
+    return "C#1";
+  case NOTE_D1:
+    return "D1";
+  case NOTE_DS1:
+    return "D#1";
+  case NOTE_E1:
+    return "E1";
+  case NOTE_F1:
+    return "F1";
+  case NOTE_FS1:
+    return "F#1";
+  case NOTE_G1:
+    return "G1";
+  case NOTE_GS1:
+    return "G#1";
+  case NOTE_A1:
+    return "A1";
+  case NOTE_AS1:
+    return "A#1";
+  }
+  
 }
