@@ -19,7 +19,7 @@ typedef enum { up, down } PWM_direction;
 #define PWM_PRESCALE 0
 #define TRUE 1
 #define FALSE 0
-#define NOTES_DELAY (10 * ONE_MILLISECOND_DELAY)
+#define NOTES_DELAY (20 * ONE_MILLISECOND_DELAY)
 #define WHOLE_NOTE (1000 * ONE_MILLISECOND_DELAY)
 
 // Function Prototypes
@@ -34,7 +34,7 @@ void TimerG8CallbackFunction(void *CallbackObject);
 Callback_s Group1 = {(void *)0, Group1CallbackFunction};
 
 // notes in the melody:
-int melody[] = {NOTE_C4_1, NOTE_C4, NOTE_D4,  NOTE_C4,  NOTE_F4, NOTE_E4,
+int melody[] = {NOTE_C4_1,   NOTE_C4, NOTE_D4,  NOTE_C4,  NOTE_F4, NOTE_E4,
                 NOTE_C4_1, NOTE_C4, NOTE_D4,  NOTE_C4,  NOTE_G4, NOTE_F4,
                 NOTE_C4_1, NOTE_C4, NOTE_C5,  NOTE_A4,  NOTE_F4, NOTE_F4,
                 NOTE_E4,   NOTE_D4, NOTE_AS4, NOTE_AS4, NOTE_A4, NOTE_F4,
@@ -49,7 +49,7 @@ int currentNote = 0;
 // Timer Object Creations
 Timer_ClockConfig TimerA1ClockConfig = {
     .clockSel = GPTIMER_CLKSEL_BUSCLK_SEL_ENABLE,
-    .divideRatio = GPTIMER_CLKDIV_RATIO_DIV_BY_8,
+    .divideRatio = GPTIMER_CLKDIV_RATIO_DIV_BY_1,
     .prescale = PWM_PRESCALE};
 Timer_TimerConfig TimerA1TimerConfig = {
     .period = 0,
@@ -130,22 +130,31 @@ void PlaySong(void *FSM) {
 
   if (FSM_l->CurrentState == Start) {
     BP_ToggleBlueLED();
-    if (currentNote >= sizeof(melody))
+    if (currentNote >= (sizeof(melody)/sizeof(melody[0])))
       currentNote = 0; // go back to beginning of song
     uint32_t period = CalculatePeriod(melody[currentNote]);
 
     // Update Note
     TimerA1TimerConfig.period = period;
     TimerA1PWMConfig.duty = period >> 1;
-    UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
+    TIMA1->COUNTERREGS.LOAD = TimerA1TimerConfig.period;
 
     // Duration of Note
     // to calculate the note duration, take one second
     // divided by the note type.
     // e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
     int duration = WHOLE_NOTE / noteDurations[currentNote];
-    TimerG12TimerConfig.period = duration + NOTES_DELAY; // delay between
+    TimerG12TimerConfig.period = duration; // delay between
+
+    UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
     TimeDelay(TIMG12, &TimerG12TimerConfig);
+
+    TimerA1PWMConfig.duty = 0;
+    TimerG12TimerConfig.period = NOTES_DELAY; // delay between
+
+    UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
+    TimeDelay(TIMG12, &TimerG12TimerConfig);
+
     currentNote++;
   }
 
@@ -153,26 +162,6 @@ void PlaySong(void *FSM) {
     TimerA1PWMConfig.duty = 0;
     UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
     BP_TurnOffBlueLED();
-  }
-}
-
-void TimerG8CallbackFunction(void *CallbackObject) {
-  FSMType *FSM = (FSMType *)CallbackObject;
-  if (TIMG8->CPU_INT.IIDX == GPTIMER_CPU_INT_IIDX_STAT_Z) {
-    // Stop Current Note
-    TimerA1PWMConfig.duty = 0;
-    UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
-
-    DisableTimer(TIMG8);
-    currentNote++;
-
-    // Check if song is over
-    if (currentNote == (sizeof(melody) - 1)) {
-      currentNote = 0; // Reset
-      FSM->CurrentState = Stop;
-    } else {
-      PlaySong((void *)FSM);
-    }
   }
 }
 
