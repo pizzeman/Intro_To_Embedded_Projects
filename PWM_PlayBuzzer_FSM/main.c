@@ -19,7 +19,7 @@ typedef enum { up, down } PWM_direction;
 #define PWM_PRESCALE 0
 #define TRUE 1
 #define FALSE 0
-#define NOTES_DELAY (1000 * ONE_MILLISECOND_DELAY)
+#define NOTES_DELAY (10 * ONE_MILLISECOND_DELAY)
 #define WHOLE_NOTE (1000 * ONE_MILLISECOND_DELAY)
 
 // Function Prototypes
@@ -65,19 +65,14 @@ Timer_PWMConfig TimerA1PWMConfig = {
     .duty = 0};
 
 // Use Timer 8 used for time delay between pitches.
-Callback_s TimerG8 = {(void *)0, TimerG8CallbackFunction};
-
-Timer_ClockConfig TimerG8ClockConfig = {
+Timer_ClockConfig TimerG12ClockConfig = {
     .clockSel = GPTIMER_CLKSEL_BUSCLK_SEL_ENABLE,
     .divideRatio = GPTIMER_CLKDIV_RATIO_DIV_BY_1,
     .prescale = 0};
-Timer_TimerConfig TimerG8TimerConfig = {
+
+Timer_TimerConfig TimerG12TimerConfig = {
     .period = NOTES_DELAY,
     .timerMode = (GPTIMER_CTRCTL_CM_DOWN | GPTIMER_CTRCTL_REPEAT_REPEAT_0)};
-// Timer_InterruptConfig TimerG8InterruptConfig = {.imask =
-//                                                     GPTIMER_CPU_INT_IMASK_Z_SET,
-//                                                 .priority = 1,
-//                                                 .IRQnum = TIMG8_INT_IRQn};
 
 int main(void) {
   uint32_t priority = 2;
@@ -117,19 +112,15 @@ int main(void) {
   __NVIC_EnableIRQ(BP_S2_INTERRUPT);
   __NVIC_SetPriority(BP_S2_INTERRUPT, priority);
 
-  TimerG8.CallbackObject = (void *)&Song_FSM;
-  InitializeTimerClock(TIMG8, &TimerG8ClockConfig);
-  InitializeTimerCompare(TIMG8, &TimerG8TimerConfig);
-  //   InitializeTimerInterrupt(TIMG8, &TimerG8InterruptConfig);
-//   EnableTimer(TIMG8);
+  InitializeTimerClock(TIMG12, &TimerG12ClockConfig);
 
   __enable_irq();
 
   // Main
 
   while (1) {
-    __WFI();
     OutputFunction(&Song_FSM);
+    TimeDelay(TIMG12, &TimerG12TimerConfig);
   }
   return 0;
 }
@@ -138,50 +129,32 @@ void PlaySong(void *FSM) {
   FSMType *FSM_l = (FSMType *)FSM;
 
   if (FSM_l->CurrentState == Start) {
-    while (currentNote < sizeof(melody)) {
-      uint32_t period = CalculatePeriod(melody[currentNote]);
+    BP_ToggleBlueLED();
+    if (currentNote >= sizeof(melody))
+      currentNote = 0; // go back to beginning of song
+    uint32_t period = CalculatePeriod(melody[currentNote]);
 
-      // Update Note
-      TimerA1TimerConfig.period = period;
-      TimerA1PWMConfig.duty = period >> 1;
-    //   UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
+    // Update Note
+    TimerA1TimerConfig.period = period;
+    TimerA1PWMConfig.duty = period >> 1;
+    UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
 
-      // Duration of Note
-      // to calculate the note duration, take one second
-      // divided by the note type.
-      // e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
-      int duration = WHOLE_NOTE / noteDurations[currentNote];
-      TimerG8TimerConfig.period = duration + NOTES_DELAY; // delay between
-      TimeDelay(TIMG8, &TimerG8TimerConfig);
-      currentNote++;
-
-    }
-    currentNote = 0;
+    // Duration of Note
+    // to calculate the note duration, take one second
+    // divided by the note type.
+    // e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+    int duration = WHOLE_NOTE / noteDurations[currentNote];
+    TimerG12TimerConfig.period = duration + NOTES_DELAY; // delay between
+    TimeDelay(TIMG12, &TimerG12TimerConfig);
+    currentNote++;
   }
 
   if (FSM_l->CurrentState == Stop) {
     TimerA1PWMConfig.duty = 0;
     UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
+    BP_TurnOffBlueLED();
   }
 }
-
-// void FSMSong(void *FSM) {
-//   FSMType *FSM_l = (FSMType *)FSM;
-
-//   // Check if num of pitches and durations are out of match; do nothing if
-//   not
-//   //   if (sizeof(melody) != sizeof(noteDurations))
-//   //     return;
-
-//   // Iterate through song array
-//   if (FSM_l->CurrentState == Start) {
-//     PlaySong();
-//   }
-//   if (FSM_l->CurrentState == Stop) {
-//     TimerA1PWMConfig.duty = 0;
-//     UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
-//   }
-// }
 
 void TimerG8CallbackFunction(void *CallbackObject) {
   FSMType *FSM = (FSMType *)CallbackObject;
