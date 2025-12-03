@@ -15,9 +15,7 @@
 #define PWM_PERIOD CLOCK_FREQUENCY / (8 * NT) // PWM f = 100 Hz => T = ms
 #define PWM_DELTA 100 * ONE_MICROSECOND_DELAY // 1% Change in duty cycle
 #define PWM_PRESCALE 0
-#define TRUE 1
-#define FALSE 0
-#define NOTES_DELAY (20 * ONE_MILLISECOND_DELAY)
+#define NOTES_DELAY (20 * ONE_MILLISECOND_DELAY) // Duration in between every note
 #define WHOLE_NOTE (1000 * ONE_MILLISECOND_DELAY)
 
 // Function Prototypes
@@ -121,6 +119,10 @@ int main(void) {
   return 0;
 }
 
+//==================================
+//           Playing Notes
+//==================================
+
 void PlaySong(void *FSM) {
   FSMType *FSM_l = (FSMType *)FSM;
 
@@ -141,10 +143,10 @@ void PlaySong(void *FSM) {
     int duration = WHOLE_NOTE / noteDurations[currentNote];
     TimerG12TimerConfig.period = duration; // delay between
 
-    UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
-    TimeDelay(TIMG12, &TimerG12TimerConfig);
+    UpdateDutyCycle(TIMA1, &TimerA1PWMConfig); // Plays note on speaker
+    TimeDelay(TIMG12, &TimerG12TimerConfig); // Sets duration of note
 
-    
+    // Add a delay between notes
     TimerA1PWMConfig.duty = 0;
     TimerG12TimerConfig.period = NOTES_DELAY; // delay between
 
@@ -154,6 +156,7 @@ void PlaySong(void *FSM) {
     currentNote++;
   }
 
+  // Turn set duty cycle to 0 if in stop state
   if (FSM_l->CurrentState == Stop) {
     TimerA1PWMConfig.duty = 0;
     UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
@@ -168,9 +171,9 @@ uint32_t CalculatePeriod(uint32_t note) {
   return (uint32_t)(period);
 }
 
-//==============
-//  FSM State
-//==============
+//==================================
+//            FSM State
+//==================================
 
 #define S1_PRESSED 1
 #define S1_RELEASED 0
