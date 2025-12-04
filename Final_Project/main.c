@@ -9,7 +9,9 @@
 #include "../LP_MSPM0G3507/timer.h"
 #include "../LP_MSPM0G3507/tone_pitch.h"
 #include "FSM_A.h"
+#include "notes_lut.h"
 #include "ti/devices/msp/msp.h"
+
 
 #define NT NOTE_C4
 
@@ -19,7 +21,7 @@
 #define PWM_PRESCALE 0
 #define NOTES_DELAY                                                            \
   (10 * ONE_MILLISECOND_DELAY) // Duration in between every note
-#define WHOLE_NOTE (1000 * ONE_MILLISECOND_DELAY)
+#define WHOLE_NOTE (2000 * ONE_MILLISECOND_DELAY) // Responsible for BPM
 
 // Function Prototypes
 uint32_t CalculatePeriod(uint32_t note);
@@ -33,16 +35,34 @@ char *NoteToText(int note);
 Callback_s Group1 = {(void *)0, Group1CallbackFunction};
 int initial_start = 1;
 
-// notes in the melody:
-int melody[] = {NOTE_C4_1, NOTE_C4, NOTE_D4,  NOTE_C4,  NOTE_F4, NOTE_E4,
-                NOTE_C4_1, NOTE_C4, NOTE_D4,  NOTE_C4,  NOTE_G4, NOTE_F4,
-                NOTE_C4_1, NOTE_C4, NOTE_C5,  NOTE_A4,  NOTE_F4, NOTE_F4,
-                NOTE_E4,   NOTE_D4, NOTE_AS4, NOTE_AS4, NOTE_A4, NOTE_F4,
-                NOTE_G4,   NOTE_F4};
+// Ode to Joy
+int melody[] = {
+    // Joyful, joyful, we adore thee, God of glory, Lord of love;
+    NOTE_E4, NOTE_E4, NOTE_F4, NOTE_G4,
+    NOTE_G4, NOTE_F4, NOTE_E4, NOTE_D4,
+    NOTE_C4, NOTE_C4, NOTE_D4, NOTE_E4,
+    NOTE_E4, NOTE_D4, NOTE_D4,
 
-// note durations: 4 = quarter note, 8 = eighth note, etc.:
-int noteDurations[] = {4, 4, 2, 2, 2, 1, 4, 4, 2, 2, 2, 1, 4,
-                       4, 2, 2, 4, 4, 2, 1, 4, 4, 2, 2, 2, 1};
+    // Melt our hearts in tender sadness, make our solemn vows a prayer.
+    NOTE_E4, NOTE_E4, NOTE_F4, NOTE_G4,
+    NOTE_G4, NOTE_F4, NOTE_E4, NOTE_D4,
+    NOTE_C4, NOTE_C4, NOTE_D4, NOTE_E4,
+    NOTE_D4, NOTE_C4, NOTE_C4
+};
+
+int noteDurations[] = {
+    // Joyful, joyful, we adore thee, God of glory, Lord of love;
+    4, 4, 4, 4, // E, E, F, G
+    4, 4, 4, 4, // G, F, E, D
+    4, 4, 4, 4, // C, C, D, E
+    4, 4, 2,      // E, D, D (Half Note)
+
+    // Melt our hearts in tender sadness, make our solemn vows a prayer.
+    4, 4, 4, 4, // E, E, F, G
+    4, 4, 4, 4, // G, F, E, D
+    4, 4, 4, 4, // C, C, D, E
+    4, 4, 2      // D, C, C (Half Note)
+};
 
 int currentNote = 0;
 
@@ -263,199 +283,4 @@ void Group1CallbackFunction(void *CallbackObject) {
   FSM->CurrentState = NextStateAlgorithm((void *)FSM);
   FSM->CurrentInput_S1 = 0;
   FSM->CurrentInput_S2 = 0;
-}
-
-char *NoteToText(int note) {
-  switch (note) {
-  default:
-    return "PTICH NOT FOUND MF";
-  // FIRST OCTAVE
-  case NOTE_B0:
-    return "B0";
-  case NOTE_C1:
-    return "C1";
-  case NOTE_CS1:
-    return "C#1";
-  case NOTE_D1:
-    return "D1";
-  case NOTE_DS1:
-    return "D#1";
-  case NOTE_E1:
-    return "E1";
-  case NOTE_F1:
-    return "F1";
-  case NOTE_FS1:
-    return "F#1";
-  case NOTE_G1:
-    return "G1";
-  case NOTE_GS1:
-    return "G#1";
-  case NOTE_A1:
-    return "A1";
-  case NOTE_AS1:
-    return "A#1";
-  // SECOND OCTAVE
-  case NOTE_B1:
-    return "B1";
-  case NOTE_C2:
-    return "C2";
-  case NOTE_CS2:
-    return "C#2";
-  case NOTE_D2:
-    return "D2";
-  case NOTE_DS2:
-    return "D#2";
-  case NOTE_E2:
-    return "E2";
-  case NOTE_F2:
-    return "F2";
-  case NOTE_FS2:
-    return "F#2";
-  case NOTE_G2:
-    return "G2";
-  case NOTE_GS2:
-    return "G#2";
-  case NOTE_A2:
-    return "A2";
-  case NOTE_AS2:
-    return "A#2";
-  // THIRD OCTACE
-  case NOTE_B2:
-    return "B2";
-  case NOTE_C3:
-    return "C3";
-  case NOTE_CS3:
-    return "C#3";
-  case NOTE_D3:
-    return "D3";
-  case NOTE_DS3:
-    return "D#3";
-  case NOTE_E3:
-    return "E3";
-  case NOTE_F3:
-    return "F3";
-  case NOTE_FS3:
-    return "F#3";
-  case NOTE_G3:
-    return "G3";
-  case NOTE_GS3:
-    return "G#3";
-  case NOTE_A3:
-    return "A3";
-  case NOTE_AS3:
-    return "A#3";
-  // FOURTH OCTAVE
-  case NOTE_B3:
-    return "B3";
-  case NOTE_C4:
-    return "C4";
-  case NOTE_CS4:
-    return "C#4";
-  case NOTE_C4_1:
-    return "C4";
-  case NOTE_D4:
-    return "D4";
-  case NOTE_DS4:
-    return "D#4";
-  case NOTE_E4:
-    return "E4";
-  case NOTE_F4:
-    return "F4";
-  case NOTE_FS4:
-    return "F#4";
-  case NOTE_G4:
-    return "G4";
-  case NOTE_GS4:
-    return "G#4";
-  case NOTE_A4:
-    return "A4";
-  case NOTE_AS4:
-    return "A#4";
-  // FIFTH OCTAVE
-  case NOTE_B4:
-    return "B4";
-  case NOTE_C5:
-    return "C5";
-  case NOTE_CS5:
-    return "C#5";
-  case NOTE_D5:
-    return "D5";
-  case NOTE_DS5:
-    return "D#5";
-  case NOTE_E5:
-    return "E5";
-  case NOTE_F5:
-    return "F5";
-  case NOTE_FS5:
-    return "F#5";
-  case NOTE_G5:
-    return "G5";
-  case NOTE_GS5:
-    return "G#5";
-  case NOTE_A5:
-    return "A5";
-  case NOTE_AS5:
-    return "A#5";
-  // SIXTH OCTAVE
-  case NOTE_B5:
-    return "B5";
-  case NOTE_C6:
-    return "C6";
-  case NOTE_CS6:
-    return "C#6";
-  case NOTE_D6:
-    return "D6";
-  case NOTE_DS6:
-    return "D#6";
-  case NOTE_E6:
-    return "E6";
-  case NOTE_F6:
-    return "F6";
-  case NOTE_FS6:
-    return "F#6";
-  case NOTE_G6:
-    return "G6";
-  case NOTE_GS6:
-    return "G#6";
-  case NOTE_A6:
-    return "A6";
-  case NOTE_AS6:
-    return "A#6";
-  // SEVENTH OCTAVE
-  case NOTE_B6:
-    return "B6";
-  case NOTE_C7:
-    return "C7";
-  case NOTE_CS7:
-    return "C#7";
-  case NOTE_D7:
-    return "D7";
-  case NOTE_DS7:
-    return "D#7";
-  case NOTE_E7:
-    return "E7";
-  case NOTE_F7:
-    return "F7";
-  case NOTE_FS7:
-    return "F#7";
-  case NOTE_G7:
-    return "G7";
-  case NOTE_GS7:
-    return "G#7";
-  case NOTE_A7:
-    return "A7";
-  case NOTE_AS7:
-    return "A#7";
-    // FINAL OCTAVEEE
-  case NOTE_B7:
-    return "B7";
-  case NOTE_C8:
-    return "C8";
-  case NOTE_CS8:
-    return "C#8";
-  case NOTE_D8:
-    return "D8";
-  case NOTE_DS8:
-    return "D#8";
-  }
 }
