@@ -1,16 +1,15 @@
 #define PROJECT_CLOCK_FREQUENCY 4000000
 #define PROJECT_ONE_MICROSECOND_DELAY 4
 
+#include "../LP_MSPM0G3507/LCD.h"
 #include "../LP_MSPM0G3507/MKII.h"
+#include "../LP_MSPM0G3507/SPI.h"
 #include "../LP_MSPM0G3507/bsp.h"
 #include "../LP_MSPM0G3507/mspm0g350x_int.h"
 #include "../LP_MSPM0G3507/timer.h"
 #include "../LP_MSPM0G3507/tone_pitch.h"
 #include "FSM_A.h"
 #include "ti/devices/msp/msp.h"
-#include "../LP_MSPM0G3507/LCD.h"
-#include "../LP_MSPM0G3507/SPI.h"
-
 
 #define NT NOTE_C4
 
@@ -18,7 +17,8 @@
 #define PWM_PERIOD CLOCK_FREQUENCY / (8 * NT) // PWM f = 100 Hz => T = ms
 #define PWM_DELTA 100 * ONE_MICROSECOND_DELAY // 1% Change in duty cycle
 #define PWM_PRESCALE 0
-#define NOTES_DELAY (20 * ONE_MILLISECOND_DELAY) // Duration in between every note
+#define NOTES_DELAY                                                            \
+  (10 * ONE_MILLISECOND_DELAY) // Duration in between every note
 #define WHOLE_NOTE (1000 * ONE_MILLISECOND_DELAY)
 
 // Function Prototypes
@@ -27,13 +27,14 @@ FSMState NextStateAlgorithm(void *FSM);
 void PlaySong(void *FSM);
 void FSMSong(void *FSM);
 void Group1CallbackFunction(void *CallbackObject);
-char* NoteToText(int note);
+char *NoteToText(int note);
 
 // Global variables
 Callback_s Group1 = {(void *)0, Group1CallbackFunction};
+int initial_start = 1;
 
 // notes in the melody:
-int melody[] = {NOTE_C4_1,   NOTE_C4, NOTE_D4,  NOTE_C4,  NOTE_F4, NOTE_E4,
+int melody[] = {NOTE_C4_1, NOTE_C4, NOTE_D4,  NOTE_C4,  NOTE_F4, NOTE_E4,
                 NOTE_C4_1, NOTE_C4, NOTE_D4,  NOTE_C4,  NOTE_G4, NOTE_F4,
                 NOTE_C4_1, NOTE_C4, NOTE_C5,  NOTE_A4,  NOTE_F4, NOTE_F4,
                 NOTE_E4,   NOTE_D4, NOTE_AS4, NOTE_AS4, NOTE_A4, NOTE_F4,
@@ -85,14 +86,13 @@ int main(void) {
   InitializeLaunchpad(PROJECT_CLOCK_FREQUENCY);
   InitializeBoosterpack(PROJECT_CLOCK_FREQUENCY);
 
-  //LCD Initializations
+  // LCD Initializations
   LCD_Init();
   LCD_FillScreen(LCD_BLACK);
   LCD_SetTextColor(LCD_CYAN);
-  LCD_OutString("AJ \"Pizzeman\" Amos \nand Isaiah \"Stingray\" \nBumgardner\n");   
+  LCD_OutString(
+      "AJ \"Pizzeman\" Amos \nand Isaiah \"Stingray\" \nBumgardner\n");
   char buffer[50];
-
-  //LCD_OutString(NoteToText(melody[0]));
 
   uint32_t period = CalculatePeriod(NT);
   TimerA1TimerConfig.period = period;
@@ -124,7 +124,14 @@ int main(void) {
 
   __enable_irq();
 
-  // Main
+  // Delay to show names slightly longer
+  TimerG12TimerConfig.period = 3000 * ONE_MILLISECOND_DELAY; // delay between
+  TimeDelay(TIMG12, &TimerG12TimerConfig);
+  TimerG12TimerConfig.period = NOTES_DELAY; // delay between
+
+  LCD_SetCursor(0, 0);
+  LCD_FillScreen(LCD_BLACK);
+  LCD_OutString("Press Switch 1 \nto Start");
 
   while (1) {
     OutputFunction(&Song_FSM);
@@ -140,14 +147,9 @@ void PlaySong(void *FSM) {
   FSMType *FSM_l = (FSMType *)FSM;
 
   if (FSM_l->CurrentState == Start) {
-    if (currentNote >= (sizeof(melody)/sizeof(melody[0])))
+    if (currentNote >= (sizeof(melody) / sizeof(melody[0])))
       currentNote = 0; // go back to beginning of song
     uint32_t period = CalculatePeriod(melody[currentNote]);
-
-    //LCD Update
-    LCD_SetCursor(0, 0);
-    LCD_OutString("The Current Note is: ");
-    LCD_OutString(NoteToText(melody[currentNote]));
 
     // Update Note
     TimerA1TimerConfig.period = period;
@@ -161,8 +163,12 @@ void PlaySong(void *FSM) {
     int duration = WHOLE_NOTE / noteDurations[currentNote];
     TimerG12TimerConfig.period = duration; // delay between
 
+    // LCD Update
+    LCD_DrawString(0, 4, "000", LCD_BLACK); // Clear previous note
+    LCD_DrawString(0, 4, NoteToText(melody[currentNote]), LCD_CYAN);
+
     UpdateDutyCycle(TIMA1, &TimerA1PWMConfig); // Plays note on speaker
-    TimeDelay(TIMG12, &TimerG12TimerConfig); // Sets duration of note
+    TimeDelay(TIMG12, &TimerG12TimerConfig);   // Sets duration of note
 
     // Add a delay between notes
     TimerA1PWMConfig.duty = 0;
@@ -176,13 +182,8 @@ void PlaySong(void *FSM) {
 
   // Turn set duty cycle to 0 if in stop state
   if (FSM_l->CurrentState == Stop) {
-    LCD_SetCursor(0, 0);
-    LCD_OutString("THE SONG HAS BEEN PAUSED!");
-    LCD_OutString("\n");
-    
     TimerA1PWMConfig.duty = 0;
     UpdateDutyCycle(TIMA1, &TimerA1PWMConfig);
-    BP_TurnOffBlueLED();
   }
 }
 
@@ -217,6 +218,13 @@ FSMState NextStateAlgorithm(void *FSM) {
     } else if (FSM_l->CurrentInput_S1 == S1_PRESSED &&
                FSM_l->CurrentInput_S2 == S2_RELEASED) {
       NextState = Start;
+      // Change string if initial start
+      if (initial_start) {
+        LCD_SetCursor(0, 0);
+        LCD_FillScreen(LCD_BLACK);
+        LCD_OutString("Current Note: ");
+        initial_start = 0;
+      }
     } else if (FSM_l->CurrentInput_S1 == S1_PRESSED &&
                FSM_l->CurrentInput_S2 == S2_PRESSED) {
       NextState = Stop;
@@ -257,11 +265,11 @@ void Group1CallbackFunction(void *CallbackObject) {
   FSM->CurrentInput_S2 = 0;
 }
 
-char* NoteToText(int note){
-  switch (note){
+char *NoteToText(int note) {
+  switch (note) {
   default:
     return "PTICH NOT FOUND MF";
-  //FIRST OCTAVE
+  // FIRST OCTAVE
   case NOTE_B0:
     return "B0";
   case NOTE_C1:
@@ -286,7 +294,7 @@ char* NoteToText(int note){
     return "A1";
   case NOTE_AS1:
     return "A#1";
-  //SECOND OCTAVE
+  // SECOND OCTAVE
   case NOTE_B1:
     return "B1";
   case NOTE_C2:
@@ -311,7 +319,7 @@ char* NoteToText(int note){
     return "A2";
   case NOTE_AS2:
     return "A#2";
-  //THIRD OCTACE
+  // THIRD OCTACE
   case NOTE_B2:
     return "B2";
   case NOTE_C3:
@@ -336,13 +344,15 @@ char* NoteToText(int note){
     return "A3";
   case NOTE_AS3:
     return "A#3";
-  //FOURTH OCTAVE
+  // FOURTH OCTAVE
   case NOTE_B3:
     return "B3";
   case NOTE_C4:
     return "C4";
   case NOTE_CS4:
     return "C#4";
+  case NOTE_C4_1:
+    return "C4";
   case NOTE_D4:
     return "D4";
   case NOTE_DS4:
@@ -361,7 +371,7 @@ char* NoteToText(int note){
     return "A4";
   case NOTE_AS4:
     return "A#4";
-  //FIFTH OCTAVE
+  // FIFTH OCTAVE
   case NOTE_B4:
     return "B4";
   case NOTE_C5:
@@ -386,7 +396,7 @@ char* NoteToText(int note){
     return "A5";
   case NOTE_AS5:
     return "A#5";
-  //SIXTH OCTAVE
+  // SIXTH OCTAVE
   case NOTE_B5:
     return "B5";
   case NOTE_C6:
@@ -411,7 +421,7 @@ char* NoteToText(int note){
     return "A6";
   case NOTE_AS6:
     return "A#6";
-  //SEVENTH OCTAVE
+  // SEVENTH OCTAVE
   case NOTE_B6:
     return "B6";
   case NOTE_C7:
@@ -436,8 +446,8 @@ char* NoteToText(int note){
     return "A7";
   case NOTE_AS7:
     return "A#7";
-  //FINAL OCTAVEEE
-    case NOTE_B7:
+    // FINAL OCTAVEEE
+  case NOTE_B7:
     return "B7";
   case NOTE_C8:
     return "C8";
@@ -448,5 +458,4 @@ char* NoteToText(int note){
   case NOTE_DS8:
     return "D#8";
   }
-  
 }
